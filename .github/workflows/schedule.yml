@@ -1,0 +1,35 @@
+# .github/workflows/schedule.yml
+# Запускает auto_post.py каждые 2 часа или вручную
+
+name: Post Every 2h
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'   # каждые 2 часа в 0 минут
+  workflow_dispatch:       # возможность ручного запуска
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests qrcode[pil]
+
+    - name: Run auto_post script
+      env:
+        TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+        CHAT_ID:       ${{ secrets.CHAT_ID }}
+        LONG_URL:      ${{ secrets.LONG_URL }}
+      run: |
+        python auto_post.py
